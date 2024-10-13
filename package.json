@@ -1,0 +1,69 @@
+{
+  "name": "kurbus",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "run-s tsc:check vite:assets vite:build",
+    "predev": "run-s vite:assets",
+    "dev": "run-p server:dev vite:dev",
+    "server:dev": "bun --watch api/_api.ts",
+    "vite:dev": "vite --host",
+    "vite:build": "vite build",
+    "prepreview": "run-s build",
+    "preview": "run-p server:dev vite:preview",
+    "vite:preview": "vite preview --host",
+    "vite:assets": "pwa-assets-generator",
+    "tsc:check": "tsc"
+  },
+  "prettier": {
+    "arrowParens": "avoid",
+    "bracketSpacing": false,
+    "importOrder": [
+      "^@/(.*)$"
+    ],
+    "importOrderSeparation": true,
+    "importOrderSortSpecifiers": true,
+    "plugins": [
+      "prettier-plugin-packagejson",
+      "@trivago/prettier-plugin-sort-imports",
+      "prettier-plugin-elm"
+    ],
+    "quoteProps": "consistent",
+    "semi": false,
+    "singleQuote": true
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.2",
+    "@hono/zod-validator": "^0.4.1",
+    "fuzzysort": "^3.0.2",
+    "hono": "^4.6.4",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@radix-ui/colors": "^3.0.0",
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@types/bun": "^1.1.11",
+    "@types/node": "^22.7.5",
+    "@vite-pwa/assets-generator": "^0.2.6",
+    "autoprefixer": "^10.4.20",
+    "daisyui": "^4.12.13",
+    "elm": "^0.19.1-6",
+    "npm-run-all": "^4.1.5",
+    "postcss": "^8.4.47",
+    "prettier-plugin-elm": "^0.11.0",
+    "prettier-plugin-packagejson": "^2.5.3",
+    "tailwindcss": "^3.4.13",
+    "typescript": "^5.5.3",
+    "vite": "^5.4.8",
+    "vite-plugin-elm": "^3.0.1",
+    "vite-plugin-pwa": "^0.20.5",
+    "vite-tsconfig-paths": "^5.0.1"
+  },
+  "postcss": {
+    "plugins": {
+      "tailwindcss": {},
+      "autoprefixer": {}
+    }
+  }
+}
