@@ -251,7 +251,7 @@ stopView model =
                     text "The request timed out"
 
         Loading ->
-            div [ class "p-2" ]
+            div [ class "px-2" ]
                 [ div [ class "flex gap-2 flex-col p-2 font-mono font-light border rounded border-neutral" ]
                     [ div [ class "animate-pulse" ] [ text "Loading" ]
                     , div [ class "flex flex-col p-2 bg-orange-950 rounded" ]
@@ -267,7 +267,7 @@ stopView model =
                 ]
 
         Success data ->
-            div [ class "p-2" ]
+            div [ class "px-2" ]
                 [ div [ class "flex gap-2 flex-col p-2 font-mono font-light border rounded border-neutral" ]
                     [ div [ class "" ] [ text data.stopName ]
                     , div [ class "flex flex-col p-2 bg-orange-950 rounded" ] (List.map passageView data.actual)
