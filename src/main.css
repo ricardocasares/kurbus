@@ -7,6 +7,17 @@ dialog::backdrop {
   @apply backdrop-blur-sm;
 }
 
+.i-save {
+  --un-icon: url("data:image/svg+xml;utf8,%3Csvg viewBox='0 0 24 24' width='1.2em' height='1.2em' xmlns='http://www.w3.org/2000/svg' %3E%3Cpath fill='currentColor' d='M4 2h14v2H4v16h2v-6h12v6h2V6h2v16H2V2zm4 18h8v-4H8zM20 6h-2V4h2zM6 6h9v4H6z'/%3E%3C/svg%3E");
+  -webkit-mask: var(--un-icon) no-repeat;
+  mask: var(--un-icon) no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  background-color: currentColor;
+  width: 1.2em;
+  height: 1.2em;
+}
+
 .i-bus {
   --un-icon: url("data:image/svg+xml;utf8,%3Csvg viewBox='0 0 24 24' width='1.2em' height='1.2em' xmlns='http://www.w3.org/2000/svg' %3E%3Cpath fill='currentColor' d='M5 2h14v2H5zm0 2v6h14V4h2v16h-2v2h-4v-2H9v2H5v-2H3V4zm0 14h14v-6H5zm2-4h2v2H7zm10 0h-2v2h2z'/%3E%3C/svg%3E");
   -webkit-mask: var(--un-icon) no-repeat;

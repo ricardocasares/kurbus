@@ -130,8 +130,13 @@ update msg model =
         UrlChanged url ->
             fetch model (Route.fromUrl url)
 
-        UrlRequested _ ->
-            ( model, Cmd.none )
+        UrlRequested request ->
+            case request of
+                Internal url ->
+                    ( model, pushUrl model.key (Route.fromUrl url |> Route.href) )
+
+                External _ ->
+                    ( model, Cmd.none )
 
         OnAutocomplete automsg ->
             let
@@ -184,8 +189,9 @@ view : Model -> Document Msg
 view model =
     { title = "Kurbus"
     , body =
-        [ div [ class "p-2" ]
-            [ autocomplete
+        [ div [ class "p-2 flex gap-2" ]
+            [ a [ class "btn btn-outline border-neutral rounded", href "/" ] [ span [ class "i-save" ] [] ]
+            , autocomplete
                 { view = Autocomplete.viewState model.autocomplete
                 , events =
                     AutocompleteView.events
@@ -197,7 +203,7 @@ view model =
             ]
         , case model.route of
             HomeRoute ->
-                div [] []
+                homeView model
 
             BusStopRoute _ ->
                 stopView model
@@ -209,6 +215,16 @@ view model =
                 text "NotFound"
         ]
     }
+
+
+homeView : Model -> Html msg
+homeView _ =
+    div [ class "px-2" ]
+        [ div [ class "flex flex-col items-center justify-center gap-4 h-96 text-neutral-content border rounded border-neutral font-mono" ]
+            [ span [ class "i-save text-3xl" ] []
+            , span [ class "text-xs" ] [ text "Nothing saved" ]
+            ]
+        ]
 
 
 stopView : Model -> Html msg
