@@ -270,7 +270,15 @@ stopView model =
             div [ class "px-2" ]
                 [ div [ class "flex gap-2 flex-col p-2 font-mono font-light border rounded border-neutral" ]
                     [ div [ class "" ] [ text data.stopName ]
-                    , div [ class "flex flex-col p-2 bg-orange-950 rounded" ] (List.map passageView data.actual)
+                    , case data.actual of
+                        [] ->
+                            div [ class "flex flex-col gap-4 p-2 items-center justify-center h-64 border border-neutral text-neutral-content rounded" ]
+                                [ span [ class "i-hands text-3xl" ] []
+                                , span [ class "text-xs" ] [ text "No passages here!" ]
+                                ]
+
+                        _ ->
+                            div [ class "flex flex-col p-2 bg-orange-950 rounded" ] (List.map passageView data.actual)
                     ]
                 ]
 
