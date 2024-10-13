@@ -13,6 +13,7 @@ export default defineConfig({
       manifest: {
         name: pkg.name,
         short_name: pkg.name,
+        background_color: '#000000',
         icons: [
           {
             src: 'pwa-64x64.png',
