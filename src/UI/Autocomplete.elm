@@ -33,18 +33,18 @@ autocomplete { view, events, render } =
             ]
         , case view.status of
             Autocomplete.NotFetched ->
-                ul [] []
+                text ""
 
             Autocomplete.Fetching ->
-                ul [] []
+                text ""
 
             Autocomplete.Error err ->
-                ul [ class "menu dropdown-content w-full bg-error text-error-content" ] [ li [ class "p-2" ] [ text err ] ]
+                ul [ class "menu dropdown-content w-full bg-error font-mono text-error-content rounded" ] [ li [ class "p-2" ] [ text err ] ]
 
             Autocomplete.FetchedChoices ->
                 case view.choices of
                     [] ->
-                        ul [] []
+                        text ""
 
                     _ ->
                         ul [ class "menu dropdown-content w-full bg-base-200 rounded shadow-lg z-10" ] (List.indexedMap (render events.choiceEvents view.selectedIndex) view.choices)

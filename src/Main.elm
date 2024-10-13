@@ -64,22 +64,22 @@ resolver lastChoices =
     Http.stringResolver
         (\response ->
             case response of
-                Http.BadUrl_ url ->
-                    Err <| "Bad url: " ++ url
+                Http.BadUrl_ _ ->
+                    Err <| "Bad url"
 
                 Http.Timeout_ ->
                     Err "Request timed out"
 
                 Http.NetworkError_ ->
-                    Err "Network error, are you offline?"
+                    Err "Are you offline?"
 
-                Http.BadStatus_ _ status ->
-                    Err <| "Bad status: " ++ status
+                Http.BadStatus_ s _ ->
+                    Err <| "Error, got status " ++ String.fromInt s.statusCode
 
                 Http.GoodStatus_ _ body ->
                     D.decodeString stopItemListDecoder body
                         |> Result.map (\choices -> { lastChoices | choices = choices })
-                        |> Result.mapError (\_ -> "Shape error, it's on us.")
+                        |> Result.mapError (\_ -> "Shape error, it's on us")
         )
 
 
@@ -90,7 +90,7 @@ fetcher choices =
         , headers = []
         , url = "/api/autocomplete"
         , body = Http.stringBody "application/json" (E.encode 0 <| E.object [ ( "search", E.string choices.query ) ])
-        , timeout = Nothing
+        , timeout = Just 10000
         , resolver = resolver choices
         }
 
@@ -235,20 +235,20 @@ stopView model =
 
         Failure err ->
             case err of
-                Http.BadStatus msg ->
-                    text (String.fromInt msg)
+                Http.BadStatus status ->
+                    httpErrorView ("Server said: " ++ String.fromInt status)
 
-                Http.BadBody a ->
-                    text a
+                Http.BadBody _ ->
+                    httpErrorView "Something odd in the server response"
 
                 Http.NetworkError ->
-                    text "Seems there's some trouble in your network"
+                    httpErrorView "Something's off with your network"
 
                 Http.BadUrl url ->
-                    text ("Bad url: " ++ url)
+                    httpErrorView ("We sent a bad URL: " ++ url)
 
                 Http.Timeout ->
-                    text "The request timed out"
+                    httpErrorView "The request timed out!"
 
         Loading ->
             div [ class "px-2" ]
@@ -268,19 +268,37 @@ stopView model =
 
         Success data ->
             div [ class "px-2" ]
-                [ div [ class "flex gap-2 flex-col p-2 font-mono font-light border rounded border-neutral" ]
-                    [ div [ class "" ] [ text data.stopName ]
-                    , case data.actual of
-                        [] ->
-                            div [ class "flex flex-col gap-4 p-2 items-center justify-center h-64 border border-neutral text-neutral-content rounded" ]
-                                [ span [ class "i-hands text-3xl" ] []
-                                , span [ class "text-xs" ] [ text "No passages here!" ]
-                                ]
-
-                        _ ->
-                            div [ class "flex flex-col p-2 bg-orange-950 rounded" ] (List.map passageView data.actual)
-                    ]
+                [ stopPassagesView data
                 ]
+
+
+httpErrorView : String -> Html msg
+httpErrorView message =
+    div [ class "px-2" ]
+        [ div [ class "flex flex-col items-center justify-center gap-4 min-h-96 text-neutral-content border rounded border-neutral font-mono" ]
+            [ span [ class "i-alert text-3xl text-error-content" ] []
+            , div [ class "flex flex-col items-center gap-2" ]
+                [ span [ class "text-md" ] [ text "Crap!" ]
+                , span [ class "text-xs" ] [ text message ]
+                ]
+            ]
+        ]
+
+
+stopPassagesView : StopPassages -> Html msg
+stopPassagesView passages =
+    div [ class "flex gap-2 flex-col p-2 font-mono font-light border rounded border-neutral" ]
+        [ div [ class "" ] [ text passages.stopName ]
+        , case passages.actual of
+            [] ->
+                div [ class "flex flex-col gap-4 p-2 items-center justify-center h-64 border border-neutral text-neutral-content rounded" ]
+                    [ span [ class "i-hands text-3xl" ] []
+                    , span [ class "text-xs" ] [ text "No passages here!" ]
+                    ]
+
+            _ ->
+                div [ class "flex flex-col p-2 bg-orange-950 rounded" ] (List.map passageView passages.actual)
+        ]
 
 
 passageView : Passage -> Html msg

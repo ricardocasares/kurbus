@@ -1,8 +1,7 @@
 import cfg from './_config'
-import {autocompleteQuery, getStopByIdParam, stopPassages} from './_schemas'
-import stops from './_stops.json'
+import {autocompleteQuery, getStopByIdParam} from './_schemas'
+import * as ttss from './_ttss'
 import {zValidator} from '@hono/zod-validator'
-import fuzzy from 'fuzzysort'
 import {Hono} from 'hono'
 
 const kind = {
@@ -10,51 +9,14 @@ const kind = {
   tram: cfg.TRAM_URL,
 } as const
 
-const prepared = stops
-  .filter(s => s.category !== 'other')
-  .map(s => ({
-    shortName: s.shortName,
-    name: s.name,
-    category: s.category,
-    prepared: fuzzy.prepare(s.name),
-  }))
-
-async function getStop(id: string, url: URL) {
-  const endpoint = new URL(
-    `/internetservice/services/passageInfo/stopPassages/stop`,
-    url,
-  )
-
-  endpoint.searchParams.set('stop', id)
-
-  return fetch(endpoint, {cache: 'no-cache'})
-    .then(r => r.json())
-    .then(stopPassages.safeParse)
-}
-
 export default new Hono()
   .basePath('/api')
   .post('/autocomplete', zValidator('json', autocompleteQuery), async c =>
-    c.json(
-      fuzzy
-        .go(c.req.valid('json').search, prepared, {
-          key: 'name',
-          limit: 10,
-          threshold: 0.7,
-        })
-        .map(({obj: {shortName, name, category}}) => ({
-          shortName,
-          name,
-          category,
-        }))
-        .slice(0, 5),
-    ),
+    c.json(ttss.autocomplete(c.req.valid('json').search, 10)),
   )
   .get('/stop/:kind/:id', zValidator('param', getStopByIdParam), async c => {
-    const passages = await getStop(
-      c.req.valid('param').id,
-      kind[c.req.valid('param').kind],
-    )
+    const params = c.req.valid('param')
+    const passages = await ttss.stop(params.id, kind[params.kind])
 
     if (passages.error) return c.json({message: 'Unexpected response'}, 500)
 
