@@ -1,3 +1,4 @@
+import pkg from './package.json'
 import {defineConfig} from 'vite'
 import elm from 'vite-plugin-elm'
 import {VitePWA} from 'vite-plugin-pwa'
@@ -10,8 +11,8 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: 'Kurbus',
-        short_name: 'Kurbus',
+        name: pkg.name,
+        short_name: pkg.name,
         icons: [
           {
             src: 'pwa-64x64.png',

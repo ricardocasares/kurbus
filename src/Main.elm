@@ -263,7 +263,7 @@ passageView : Passage -> Html msg
 passageView passage =
     div [ class "flex gap-3 text-orange-500" ]
         [ div [ class "w-6 text-right shrink-0" ] [ text passage.patternText ]
-        , div [ class "grow" ] [ div [ class "w-52 sm:w-full text-ellipsis overflow-hidden whitespace-nowrap" ] [ text passage.direction ] ]
+        , div [ class "grow" ] [ div [ class "w-48 sm:w-full text-ellipsis overflow-hidden whitespace-nowrap" ] [ text passage.direction ] ]
         , div [ class "tabular-nums" ] [ passageStatusView passage ]
         ]
 
@@ -272,16 +272,24 @@ passageStatusView : Passage -> Html msg
 passageStatusView passage =
     case passage.status of
         Planned ->
-            text (String.fromInt (toMinutes passage.actualRelativeTime) ++ " min")
+            if passage.actualRelativeTime <= 0 then
+                text ("+" ++ String.fromInt (abs (toMinutes passage.actualRelativeTime)) ++ " min")
+
+            else
+                text (String.fromInt (toMinutes passage.actualRelativeTime) ++ " min")
 
         Predicted ->
-            text (String.fromInt (toMinutes passage.actualRelativeTime) ++ " min")
+            if passage.actualRelativeTime <= 0 then
+                text ("+" ++ String.fromInt (abs (toMinutes passage.actualRelativeTime)) ++ " min")
+
+            else
+                text (String.fromInt (toMinutes passage.actualRelativeTime) ++ " min")
 
         Stopping ->
             span [ class "animate-pulse" ] [ text ">>>" ]
 
         Departed ->
-            text ">>>"
+            text "<<<"
 
 
 stopChoiceView : (Int -> List (Attribute Msg)) -> Maybe Int -> Int -> AutocompleteStop -> Html Msg
