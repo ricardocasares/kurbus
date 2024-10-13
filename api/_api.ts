@@ -5,6 +5,11 @@ import {zValidator} from '@hono/zod-validator'
 import fuzzy from 'fuzzysort'
 import {Hono} from 'hono'
 
+const kind = {
+  bus: cfg.BUS_URL,
+  tram: cfg.TRAM_URL,
+} as const
+
 const prepared = stops
   .filter(s => s.category !== 'other')
   .map(s => ({
@@ -45,23 +50,13 @@ export default new Hono()
         .slice(0, 5),
     ),
   )
-  .get('/stop/bus/:id', zValidator('param', getStopByIdParam), async c => {
-    const passages = await getStop(c.req.valid('param').id, cfg.BUS_URL)
+  .get('/stop/:kind/:id', zValidator('param', getStopByIdParam), async c => {
+    const passages = await getStop(
+      c.req.valid('param').id,
+      kind[c.req.valid('param').kind],
+    )
 
-    if (passages.error) {
-      console.log(passages.error)
-      return c.json({message: 'The API return an unexpected response'}, 500)
-    }
-
-    return c.json(passages.data)
-  })
-  .get('/stop/tram/:id', zValidator('param', getStopByIdParam), async c => {
-    const passages = await getStop(c.req.valid('param').id, cfg.TRAM_URL)
-
-    if (passages.error) {
-      console.log(passages.error)
-      return c.json({message: 'The API return an unexpected response'}, 500)
-    }
+    if (passages.error) return c.json({message: 'Unexpected response'}, 500)
 
     return c.json(passages.data)
   })

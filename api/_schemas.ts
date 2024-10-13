@@ -22,6 +22,7 @@ export const autocompleteQuery = z.object({
 export type GetStopByIdParam = z.infer<typeof getStopByIdParam>
 export const getStopByIdParam = z.object({
   id: z.string(),
+  kind: z.enum(['bus', 'tram']),
 })
 
 export type Passage = z.infer<typeof passage>
