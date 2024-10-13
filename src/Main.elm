@@ -4,7 +4,7 @@ import Autocomplete exposing (Autocomplete, choices)
 import Autocomplete.View as AutocompleteView
 import Browser exposing (Document, UrlRequest(..))
 import Browser.Navigation exposing (Key, pushUrl)
-import Data.Stop exposing (AutocompleteStopItem, AutocompleteStopKind(..), Passage, PassageStatus(..), StopPassages, stopItemListDecoder, stopPassagesDecoder)
+import Data.Stop exposing (AutocompleteStop, AutocompleteStopKind(..), Passage, PassageStatus(..), StopPassages, stopItemListDecoder, stopPassagesDecoder)
 import Html exposing (Attribute, Html, a, div, li, span, text)
 import Html.Attributes exposing (class, href)
 import Http
@@ -32,9 +32,9 @@ main =
 type alias Model =
     { key : Key
     , route : Route
-    , autocompleteStop : Autocomplete AutocompleteStopItem
-    , selectedStop : Maybe AutocompleteStopItem
-    , stopPassages : WebData StopPassages
+    , autocomplete : Autocomplete AutocompleteStop
+    , selected : Maybe AutocompleteStop
+    , passages : WebData StopPassages
     }
 
 
@@ -42,7 +42,7 @@ type Msg
     = NoOp
     | UrlChanged Url
     | UrlRequested UrlRequest
-    | OnAutocomplete (Autocomplete.Msg AutocompleteStopItem)
+    | OnAutocomplete (Autocomplete.Msg AutocompleteStop)
     | OnAutocompleteSelect
     | GotStopPassages (WebData StopPassages)
 
@@ -52,14 +52,14 @@ init _ url key =
     fetch
         { key = key
         , route = Route.fromUrl url
-        , autocompleteStop = Autocomplete.init { query = "", choices = [], ignoreList = [] } fetcher
-        , selectedStop = Nothing
-        , stopPassages = NotAsked
+        , autocomplete = Autocomplete.init { query = "", choices = [], ignoreList = [] } fetcher
+        , selected = Nothing
+        , passages = NotAsked
         }
         (Route.fromUrl url)
 
 
-resolver : Autocomplete.Choices AutocompleteStopItem -> Http.Resolver String (Autocomplete.Choices AutocompleteStopItem)
+resolver : Autocomplete.Choices AutocompleteStop -> Http.Resolver String (Autocomplete.Choices AutocompleteStop)
 resolver lastChoices =
     Http.stringResolver
         (\response ->
@@ -83,7 +83,7 @@ resolver lastChoices =
         )
 
 
-fetcher : Autocomplete.Choices AutocompleteStopItem -> Task String (Autocomplete.Choices AutocompleteStopItem)
+fetcher : Autocomplete.Choices AutocompleteStop -> Task String (Autocomplete.Choices AutocompleteStop)
 fetcher choices =
     Http.task
         { method = "POST"
@@ -105,7 +105,7 @@ fetch model route =
             ( { model | route = NotFoundRoute }, Cmd.none )
 
         BusStopRoute id ->
-            ( { model | stopPassages = Loading, route = BusStopRoute id }
+            ( { model | passages = Loading, route = BusStopRoute id }
             , Http.get
                 { url = "/api/stop/bus/" ++ id
                 , expect = Http.expectJson (RemoteData.fromResult >> GotStopPassages) stopPassagesDecoder
@@ -113,7 +113,7 @@ fetch model route =
             )
 
         TramStopRoute id ->
-            ( { model | stopPassages = Loading, route = BusStopRoute id }
+            ( { model | passages = Loading, route = BusStopRoute id }
             , Http.get
                 { url = "/api/stop/tram/" ++ id
                 , expect = Http.expectJson (RemoteData.fromResult >> GotStopPassages) stopPassagesDecoder
@@ -136,27 +136,27 @@ update msg model =
         OnAutocomplete automsg ->
             let
                 ( state, cmd ) =
-                    Autocomplete.update automsg model.autocompleteStop
+                    Autocomplete.update automsg model.autocomplete
             in
-            ( { model | autocompleteStop = state }, Cmd.map OnAutocomplete cmd )
+            ( { model | autocomplete = state }, Cmd.map OnAutocomplete cmd )
 
         OnAutocompleteSelect ->
             let
                 query =
-                    Autocomplete.query model.autocompleteStop
+                    Autocomplete.query model.autocomplete
 
                 selectedStop =
-                    Autocomplete.selectedValue model.autocompleteStop
+                    Autocomplete.selectedValue model.autocomplete
             in
             ( { model
-                | selectedStop = selectedStop
-                , autocompleteStop =
+                | selected = selectedStop
+                , autocomplete =
                     Autocomplete.reset
                         { query = Maybe.withDefault query <| Maybe.map .name selectedStop
                         , choices = []
                         , ignoreList = []
                         }
-                        model.autocompleteStop
+                        model.autocomplete
               }
             , case selectedStop of
                 Just stop ->
@@ -177,16 +177,16 @@ update msg model =
             )
 
         GotStopPassages data ->
-            ( { model | stopPassages = data }, Cmd.none )
+            ( { model | passages = data }, Cmd.none )
 
 
 view : Model -> Document Msg
 view model =
-    { title = "Kurwa"
+    { title = "Kurbus"
     , body =
         [ div [ class "p-2" ]
             [ autocomplete
-                { view = Autocomplete.viewState model.autocompleteStop
+                { view = Autocomplete.viewState model.autocomplete
                 , events =
                     AutocompleteView.events
                         { onSelect = OnAutocompleteSelect
@@ -213,7 +213,7 @@ view model =
 
 stopView : Model -> Html msg
 stopView model =
-    case model.stopPassages of
+    case model.passages of
         NotAsked ->
             text "NotAsked"
 
@@ -284,7 +284,7 @@ passageStatusView passage =
             text ">>>"
 
 
-stopChoiceView : (Int -> List (Attribute Msg)) -> Maybe Int -> Int -> AutocompleteStopItem -> Html Msg
+stopChoiceView : (Int -> List (Attribute Msg)) -> Maybe Int -> Int -> AutocompleteStop -> Html Msg
 stopChoiceView events selectedIndex index stop =
     li []
         [ a
@@ -301,7 +301,7 @@ stopChoiceView events selectedIndex index stop =
         ]
 
 
-stopKindView : AutocompleteStopItem -> Html msg
+stopKindView : AutocompleteStop -> Html msg
 stopKindView stop =
     case stop.kind of
         Bus ->

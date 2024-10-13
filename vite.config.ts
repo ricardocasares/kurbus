@@ -10,8 +10,8 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: 'KurwaJade',
-        short_name: 'KurwaJade',
+        name: 'Kurbus',
+        short_name: 'Kurbus',
         icons: [
           {
             src: 'pwa-64x64.png',

@@ -1,6 +1,6 @@
 module Data.Stop exposing (..)
 
-import Codec exposing (Codec, array, buildObject, decoder, enum, field, int, list, object, optionalField, string)
+import Codec exposing (Codec, buildObject, decoder, enum, field, int, list, object, string)
 
 
 type PassageStatus
@@ -72,27 +72,27 @@ stopKindCodec =
     enum string [ ( "bus", Bus ), ( "tram", Tram ), ( "other", Other ) ]
 
 
-type alias AutocompleteStopItem =
+type alias AutocompleteStop =
     { id : String
     , name : String
     , kind : AutocompleteStopKind
     }
 
 
-stopItemCodec : Codec AutocompleteStopItem
+stopItemCodec : Codec AutocompleteStop
 stopItemCodec =
-    object AutocompleteStopItem
+    object AutocompleteStop
         |> field "shortName" .id string
         |> field "name" .name string
         |> field "category" .kind stopKindCodec
         |> Codec.buildObject
 
 
-stopItemListCodec : Codec (List AutocompleteStopItem)
+stopItemListCodec : Codec (List AutocompleteStop)
 stopItemListCodec =
     list stopItemCodec
 
 
-stopItemListDecoder : Codec.Decoder (List AutocompleteStopItem)
+stopItemListDecoder : Codec.Decoder (List AutocompleteStop)
 stopItemListDecoder =
     decoder stopItemListCodec
