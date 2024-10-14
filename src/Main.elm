@@ -5,8 +5,9 @@ import Autocomplete.View as AutocompleteView
 import Browser exposing (Document, UrlRequest(..))
 import Browser.Navigation exposing (Key, pushUrl)
 import Data.Stop exposing (AutocompleteStop, AutocompleteStopKind(..), Passage, PassageStatus(..), StopPassages, stopItemListDecoder, stopPassagesDecoder)
-import Html exposing (Attribute, Html, a, div, li, span, text)
-import Html.Attributes exposing (class, href)
+import Html exposing (Attribute, Html, a, button, div, form, li, span, text)
+import Html.Attributes exposing (attribute, class, href, method)
+import Html.Events exposing (onClick)
 import Http
 import Json.Decode as D
 import Json.Encode as E
@@ -14,6 +15,7 @@ import RemoteData exposing (RemoteData(..), WebData)
 import Route exposing (Route(..))
 import Task exposing (Task)
 import UI.Autocomplete exposing (autocomplete)
+import UI.Dialog exposing (dialog)
 import Url exposing (Url)
 
 
@@ -35,6 +37,7 @@ type alias Model =
     , autocomplete : Autocomplete AutocompleteStop
     , selected : Maybe AutocompleteStop
     , passages : WebData StopPassages
+    , modalOpen : Bool
     }
 
 
@@ -45,6 +48,8 @@ type Msg
     | OnAutocomplete (Autocomplete.Msg AutocompleteStop)
     | OnAutocompleteSelect
     | GotStopPassages (WebData StopPassages)
+    | OpenModal
+    | CloseModal
 
 
 init : () -> Url -> Key -> ( Model, Cmd Msg )
@@ -55,6 +60,7 @@ init _ url key =
         , autocomplete = Autocomplete.init { query = "", choices = [], ignoreList = [] } fetcher
         , selected = Nothing
         , passages = NotAsked
+        , modalOpen = False
         }
         (Route.fromUrl url)
 
@@ -184,6 +190,12 @@ update msg model =
         GotStopPassages data ->
             ( { model | passages = data }, Cmd.none )
 
+        OpenModal ->
+            ( { model | modalOpen = True }, Cmd.none )
+
+        CloseModal ->
+            ( { model | modalOpen = False }, Cmd.none )
+
 
 view : Model -> Document Msg
 view model =
@@ -217,12 +229,20 @@ view model =
     }
 
 
-homeView : Model -> Html msg
-homeView _ =
+homeView : Model -> Html Msg
+homeView model =
     div [ class "px-2" ]
         [ div [ class "flex flex-col items-center justify-center gap-4 h-96 text-neutral-content border rounded border-neutral font-mono" ]
             [ span [ class "i-save text-3xl" ] []
             , span [ class "text-xs" ] [ text "Nothing saved" ]
+            , button [ onClick OpenModal, class "btn btn-sm" ] [ text "Open modal" ]
+            , dialog model.modalOpen
+                CloseModal
+                [ class "modal modal-bottom sm:modal-middle backdrop:backdrop-blur-sm" ]
+                [ div [ class "modal-box bg-base-200" ]
+                    [ div [ class "rounded-xl h-48 bg-neutral" ] []
+                    ]
+                ]
             ]
         ]
 
