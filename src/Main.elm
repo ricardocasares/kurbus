@@ -6,7 +6,7 @@ import Browser exposing (Document, UrlRequest(..))
 import Browser.Navigation exposing (Key, pushUrl)
 import Data.Stop exposing (AutocompleteStop, AutocompleteStopKind(..), Passage, PassageStatus(..), StopPassages, stopItemListDecoder, stopPassagesDecoder)
 import Html exposing (Attribute, Html, a, button, div, form, li, span, text)
-import Html.Attributes exposing (attribute, class, href, method)
+import Html.Attributes exposing (autofocus, class, href, method)
 import Html.Events exposing (onClick)
 import Http
 import Json.Decode as D
@@ -232,15 +232,17 @@ view model =
 homeView : Model -> Html Msg
 homeView model =
     div [ class "px-2" ]
-        [ div [ class "flex flex-col items-center justify-center gap-4 h-96 text-neutral-content border rounded border-neutral font-mono" ]
+        [ div [ class "flex flex-col items-center justify-center gap-4 h-96 text-neutral-content border rounded border-neutral" ]
             [ span [ class "i-save text-3xl" ] []
             , span [ class "text-xs" ] [ text "Nothing saved" ]
             , button [ onClick OpenModal, class "btn btn-sm" ] [ text "Open modal" ]
             , dialog model.modalOpen
                 CloseModal
                 [ class "modal modal-bottom sm:modal-middle backdrop:backdrop-blur-sm" ]
-                [ div [ class "modal-box bg-base-200" ]
-                    [ div [ class "rounded-xl h-48 bg-neutral" ] []
+                [ div [ class "modal-box border-neutral border" ]
+                    [ div [ class "modal-action" ]
+                        [ form [ method "dialog" ] [ button [ class "btn btn-sm btn-accent btn-outline", autofocus True ] [ text "Test" ] ]
+                        ]
                     ]
                 ]
             ]
@@ -272,7 +274,7 @@ stopView model =
 
         Loading ->
             div [ class "px-2" ]
-                [ div [ class "flex gap-2 flex-col p-2 font-mono font-light border rounded border-neutral" ]
+                [ div [ class "flex gap-2 flex-col p-2 border rounded border-neutral" ]
                     [ div [ class "animate-pulse" ] [ text "Loading" ]
                     , div [ class "flex flex-col p-2 bg-orange-950 rounded" ]
                         (List.map
@@ -295,7 +297,7 @@ stopView model =
 httpErrorView : String -> Html msg
 httpErrorView message =
     div [ class "px-2" ]
-        [ div [ class "flex flex-col items-center justify-center gap-4 min-h-96 text-neutral-content border rounded border-neutral font-mono" ]
+        [ div [ class "flex flex-col items-center justify-center gap-4 min-h-96 text-neutral-content border rounded border-neutral" ]
             [ span [ class "i-alert text-3xl text-error-content" ] []
             , div [ class "flex flex-col items-center gap-2" ]
                 [ span [ class "text-md" ] [ text "Crap!" ]
@@ -307,8 +309,8 @@ httpErrorView message =
 
 stopPassagesView : StopPassages -> Html msg
 stopPassagesView passages =
-    div [ class "flex gap-2 flex-col p-2 font-mono font-light border rounded border-neutral" ]
-        [ div [ class "" ] [ text passages.stopName ]
+    div [ class "flex gap-2 flex-col p-2 border rounded border-neutral" ]
+        [ div [ class "text-xl" ] [ text passages.stopName ]
         , case passages.actual of
             [] ->
                 div [ class "flex flex-col gap-4 p-2 items-center justify-center h-64 border border-neutral text-neutral-content rounded" ]
@@ -323,7 +325,7 @@ stopPassagesView passages =
 
 passageView : Passage -> Html msg
 passageView passage =
-    div [ class "flex gap-3 text-orange-500" ]
+    div [ class "flex gap-3 text-orange-500 font-mono" ]
         [ div [ class "w-6 text-right shrink-0" ] [ text passage.patternText ]
         , div [ class "grow" ] [ div [ class "w-48 sm:w-full text-ellipsis overflow-hidden whitespace-nowrap" ] [ text passage.direction ] ]
         , div [ class "tabular-nums" ] [ passageStatusView passage ]
@@ -361,7 +363,7 @@ stopChoiceView events selectedIndex index stop =
             (List.append
                 [ selectedStopView selectedIndex index
                 , href (Route.href (BusStopRoute stop.id))
-                , class "p-2 rounded flex flex-row items-center font-mono"
+                , class "p-2 rounded flex flex-row items-center"
                 ]
                 (events index)
             )

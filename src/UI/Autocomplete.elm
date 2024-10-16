@@ -16,7 +16,7 @@ type alias AutcompleteConfig a msg =
 autocomplete : AutcompleteConfig a msg -> Html msg
 autocomplete { view, events, render } =
     div [ class "dropdown w-full" ]
-        [ div [ class "text-gray-dim p-2 w-full font-mono flex items-center gap-2 input input-bordered input-md rounded" ]
+        [ div [ class "text-gray-dim p-2 w-full flex items-center gap-2 input input-bordered input-md rounded" ]
             [ input (events.inputEvents ++ [ value view.query, spellcheck False, placeholder "Search for a stop", class "bg-base-100 grow outline-none" ]) []
             , case view.status of
                 Autocomplete.NotFetched ->
@@ -39,7 +39,7 @@ autocomplete { view, events, render } =
                 text ""
 
             Autocomplete.Error err ->
-                ul [ class "menu dropdown-content w-full bg-error font-mono text-error-content rounded" ] [ li [ class "p-2" ] [ text err ] ]
+                ul [ class "menu dropdown-content w-full bg-error text-error-content rounded" ] [ li [ class "p-2" ] [ text err ] ]
 
             Autocomplete.FetchedChoices ->
                 case view.choices of
